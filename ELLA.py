@@ -11,7 +11,7 @@ from sklearn.metrics import accuracy_score, explained_variance_score
 
 class ELLA(object):
     """ The ELLA model """
-    def __init__(self,d,k,base_learner,mu=1,lam=1):
+    def __init__(self,d,k,base_learner,base_learner_kwargs={},mu=1,lam=1):
     	""" Initializes a new model for the given base_learner.
     	    d: the number of parameters for the base learner
     	    k: the number of latent model components
@@ -39,6 +39,7 @@ class ELLA(object):
             raise Exception("Unsupported Base Learner")
 
         self.base_learner = base_learner
+        self.base_learner_kwargs = base_learner_kwargs
 
     def fit(self,X,y,task_id):
         """ Fit the model to a new batch of training data.  The task_id must
@@ -50,7 +51,7 @@ class ELLA(object):
             task_id: the id of the task
         """
         self.T += 1
-        single_task_model = self.base_learner(fit_intercept=False).fit(X,y)
+        single_task_model = self.base_learner(fit_intercept=False,**self.base_learner_kwargs).fit(X,y)
         D_t = self.get_hessian(single_task_model, X, y)
         D_t_sqrt = sqrtm(D_t)
         theta_t = single_task_model.coef_
