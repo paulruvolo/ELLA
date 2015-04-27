@@ -94,7 +94,7 @@ class ELLA(object):
         if self.base_learner == LinearRegression or self.base_learner == Ridge:
             raise Exception("This base learner does not support predicting probabilities")
         elif self.base_learner == LogisticRegression:
-            return 1./(1.0+np.exp(-X.dot(self.L.dot(self.S[:,task_id]))))
+            return np.exp(self.predict_logprobs(X,task_id))
 
     def predict_logprobs(self,X,task_id):
         """ Output ELLA's predictions for the specified data on the specified
