@@ -3,7 +3,9 @@
     @author: Paul Ruvolo
 """
 
+from math import log
 import numpy as np
+from scipy.misc import logsumexp
 from scipy.linalg import sqrtm, inv, norm
 from sklearn.linear_model import LinearRegression, Ridge, LogisticRegression, Lasso
 import matplotlib.pyplot as plt
@@ -94,6 +96,16 @@ class ELLA(object):
         elif self.base_learner == LogisticRegression:
             return 1./(1.0+np.exp(-X.dot(self.L.dot(self.S[:,task_id]))))
 
+    def predict_logprobs(self,X,task_id):
+        """ Output ELLA's predictions for the specified data on the specified
+            task_id.  If using a continuous model (Ridge and LinearRegression)
+            the result is the prediction.  If using a classification model
+            (LogisticRgerssion) the output is currently a probability.
+        """
+        if self.base_learner == LinearRegression or self.base_learner == Ridge:
+            raise Exception("This base learner does not support predicting probabilities")
+        elif self.base_learner == LogisticRegression:
+            return -logsumexp(np.hstack((np.zeros((X.shape[0],1)), -X.dot(self.L.dot(self.S[:,task_id])))),axis=1)
 
     def score(self,X,y,task_id):
         """ Output the score for ELLA's model on the specified testing data.
